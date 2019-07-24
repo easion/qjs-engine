@@ -1,4 +1,7 @@
-/* example of JS module */
+/* 
+API Like:
+https://github.com/JCMais/node-libcurl
+*/
 import * as CURL from "curl.so";
 import * as utils from "../res/utils.js";
 
@@ -41,8 +44,8 @@ client.on('header', (sz, chunk) => {
   console.log('Receiving headers with data: ', chunk)
 })
 
-
-client.on('end', (statusCode, body) => {
+function complete_cb(statusCode, body)  {
+	console.log("curl completed!"); 
   if (statusCode !== 200)
   {
 	  console.log('received http state:')
@@ -59,7 +62,9 @@ client.on('end', (statusCode, body) => {
   console.log('Receiving data name: ' + json.results[0].location.name)
 
   //client.close();
-})
+}
+
+//client.on('end', complete_cb);
 
 client.on('error', function(error, msg){
 	console.log("Error happend" + error, msg);
@@ -68,10 +73,10 @@ client.on('error', function(error, msg){
 
 
 os.setTimeout(10000,function () {
-	client.close(); /*等待完成,否则会被JS垃圾回收*/
+	client.close(); //绛夊緟瀹屾垚,鍚﹀垯浼氳JS鍨冨溇鍥炴敹
     console.log("timeout completed"); 
 } ); 
 
 console.log('start perform')
-client.perform();
+client.perform(complete_cb);
 

@@ -4,7 +4,10 @@ import {ModbusRTU} from "../res/modbus/index.js";
 var client = new ModbusRTU();
 
 console.log("--new okey--");
-
+/*
+Code portting from:
+https://github.com/yaacov/node-modbus-serial
+*/
 // open connection to a serial port
 client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600 }, read);
 

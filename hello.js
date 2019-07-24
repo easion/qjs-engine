@@ -129,8 +129,8 @@ RaftLink.onEvent('webui',function(msg, code){
 	console.log("Element value: " + code);
 });
 
-RaftLink.onEvent('bus',function(msg){
-	console.log("Bus Event");
+RaftLink.onEvent('bus',function(msg, body){
+	console.log("Bus Event",msg,body);
 });
 
 /*ubus calling*/
@@ -141,3 +141,21 @@ RaftLink.busCall('system','info','{}', function(msg){
 RaftLink.busCall('system','board','{}', function(msg){
 	console.log("uBus system board result: " + msg);
 });
+
+/*定时器*/
+var h = os.setInterval(3000,function (m) {
+	console.log("Got Interval Message: ", m); 
+}, 'hello Interval');
+
+/*超时计时器*/
+os.setTimeout(25000,function (m) {
+    console.log("Web notice Message ", m); 
+	RaftLink.noticeMessage('web', 'Hello world, JS');
+	os.clearInterval(h);
+	console.log("clear Interval Okey!"); 
+}, "dpp" ); 
+
+/*超时计时器*/
+os.setTimeout(2000,function (m) {
+    console.log("timeout without argments ", m); 	
+} ); 
