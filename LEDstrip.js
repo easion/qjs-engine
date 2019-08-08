@@ -103,7 +103,7 @@ homekit.setError(function(err){
 	console.log("HAP Error happend!!");
 	if (retryInterval === null)
 	{
-		retryInterval = os.setTimeout(5000, homekitRetryCb);
+		retryInterval = os.setTimeout(homekitRetryCb, 5000);
 	}
 });
 
