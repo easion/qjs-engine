@@ -14,12 +14,12 @@
 |v1.0 |First initial version|Easion|2019-08-08 |
 
 
-> 网站: 
-**iot.wifi-town.com**
+> 提示
+**本文档编写尚未完成会处于持续更新状态，敬请期待**
 
 
 ## 1. 概论
-  [RaftLink](https://raftlink.1688.com/)是广州市孚海软件技术有限公司的注册商标。改产品主要用作路由器/物联网/智能家居用途。支持小程序、天猫精灵远程控制，提供面板、运行ZIGBEE网关、HOMEKIT、在线视频等功能，并提供二次开发API接口。
+  [RaftLink](https://raftlink.1688.com/)是广州市孚海软件技术有限公司的注册商标。该产品主要用作路由器/物联网/智能家居用途。支持小程序、天猫精灵远程控制，提供面板、运行ZIGBEE网关、HOMEKIT、在线视频等功能，并提供二次开发API接口。
   
   [QuickJS Javascript Engine](https://bellard.org/quickjs)是FFmpeg和QEMU的创建者Fabrice Bellard开发的约4.7万行代码实现的JavaScript引擎，详情请见上面网页的《Introduction》章节。
   
@@ -68,6 +68,8 @@ import * as homekit from "../res/hap.js";
 console.log(`scriptArgs : ${scriptArgs}`);
 console.log(`scriptConfigFile : ${scriptConfigFile}`);
 ```
+
+**脚本需使用UTF-8编码，否则包含中文或非ASCII字符会导致加载出错，并删除已经上传的主程序**
 
 #### 2.2 调试
 console.log的输出将保存在系统日志中。
