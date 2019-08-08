@@ -15,7 +15,7 @@
 
 
 > 提示
-**本文档编写尚未完成会处于持续更新状态，敬请期待**
+**本文档编写尚未完成,处于持续更新状态，敬请期待**
 
 
 ## 1. 概论
@@ -23,8 +23,8 @@
   
   [QuickJS Javascript Engine](https://bellard.org/quickjs)是FFmpeg和QEMU的创建者Fabrice Bellard开发的约4.7万行代码实现的JavaScript引擎，详情请见上面网页的《Introduction》章节。
   
-    [QuickJS 官方文档在此](https://bellard.org/quickjs/quickjs.html)
-    [RaftLink设备购买地址](https://raftlink.1688.com/)
+[QuickJS 官方文档在此](https://bellard.org/quickjs/quickjs.html)
+[RaftLink设备购买地址](https://raftlink.1688.com/)
  
 下面是我们对该软件的修改:
   - 融入RaftLink软件通讯框架，仍然保存单进程运行架构。
@@ -51,6 +51,8 @@
 >下图是软件基本配置页面：.
 
 ![qjs.png](qjs.png)
+
+
 程序允许用户上传三种脚本，分别是“主程序脚本”，“备份脚本”，“本地保存的配置文件”.
 
 |类型|作用|
