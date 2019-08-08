@@ -49,7 +49,7 @@
 
 #### 2.1 编程架构
 >下图是软件基本配置页面：.
-[Multicast DNS - Wikipedia](http://en.wikipedia.org/wiki/Multicast_DNS/)
+
 ![qjs.png](qjs.png)
 程序允许用户上传三种脚本，分别是“主程序脚本”，“备份脚本”，“本地保存的配置文件”.
 
