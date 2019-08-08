@@ -44,7 +44,7 @@ const getMeterValue = async (id,addr) => {
     }
 }
 
-const sleep = (ms) => new Promise(resolve => os.setTimeout(ms, resolve));
+const sleep = (ms) => new Promise(resolve => os.setTimeout(resolve,ms));
 
 function read() {
 	console.log("--open rtu okey--");

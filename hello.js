@@ -6,7 +6,7 @@ console.log(`scriptArgs : ${scriptArgs}`);
 console.log(`scriptConfigFile : ${scriptConfigFile}`);
 
 /*
-Í¨Ñ¶Ğ­Òé·ÂÂÌÃ×API
+é€šè®¯åè®®ä»¿ç»¿ç±³API
 https://github.com/lumi-openlcoud/opencloud-docs/blob/master/zh/docs/development/gateway-LAN-communication.md
 */
 const  PRODUCT_MODEL = "qjs.raftlink";
@@ -43,7 +43,7 @@ var writeRspCmd = {
 
 var retryInterval= null;
 
-/*¶Ï¿ªÖØÁ¬*/
+/*æ–­å¼€é‡è¿*/
 function  homekitRetryCb(){
     console.log("homekitRetryCb call");
 	homekit.open(function(result){
@@ -55,7 +55,7 @@ function  homekitRetryCb(){
 		}
 		else{
 			console.log("result error: " + result);
-			retryInterval = os.setTimeout(5000, homekitRetryCb);
+			retryInterval = os.setTimeout(homekitRetryCb, 5000);
 		}
 	});
 
@@ -69,7 +69,7 @@ homekit.setError(function(err){
 	}
 });
 
-/*ÏìÓ¦HOMEHUBÇëÇó*/
+/*å“åº”HOMEHUBè¯·æ±‚*/
 homekit.requestEvent(function(e){
 	if (!e.cmd)
 	{
@@ -95,11 +95,11 @@ homekit.requestEvent(function(e){
 	}
 });
 
-/*·¢ÆğHOMEHUBÁ¬½ÓÍ¨Ñ¶*/
+/*å‘èµ·HOMEHUBè¿æ¥é€šè®¯*/
 homekit.open(function(result){
 	if (result == 'ok')
 	{
-		/*³É¹¦*/
+		/*æˆåŠŸ*/
 		homekit.send(iamCmd);
 	}
 	else{
@@ -107,7 +107,7 @@ homekit.open(function(result){
 	}
 });
 
-/*´´½¨WEB¿ØÖÆ½Ó¿Ú*/
+/*åˆ›å»ºWEBæ§åˆ¶æ¥å£*/
 RaftLink.createUI('mykey1', 'link',
 	'http://iot.wifi-town.com/', 'Link From JS');
 
@@ -126,7 +126,7 @@ console.log("set global key2 value: " + mykey2);
 console.log("set global key3 value: " + mykey3);
 console.log("set global key4 value: " + mykey4);
 
-/*ÏìÓ¦WEB¿ØÖÆÊÂ¼şÏûÏ¢*/
+/*å“åº”WEBæ§åˆ¶äº‹ä»¶æ¶ˆæ¯*/
 RaftLink.onEvent('webui',function(msg, code){
 	console.log("Web Event key: " + msg);
 	console.log("Element value: " + code);
@@ -145,20 +145,20 @@ RaftLink.busCall('system','board','{}', function(msg){
 	console.log("uBus system board result: " + msg);
 });
 
-/*¶¨Ê±Æ÷*/
-var h = os.setInterval(3000,function (m) {
+/*å®šæ—¶å™¨*/
+var h = os.setInterval(function (m) {
 	console.log("Got Interval Message: ", m); 
-}, 'hello Interval');
+}, 3000, 'hello Interval');
 
-/*³¬Ê±¼ÆÊ±Æ÷*/
-os.setTimeout(25000,function (m) {
+/*è¶…æ—¶è®¡æ—¶å™¨*/
+os.setTimeout(function (m) {
     console.log("Web notice Message ", m); 
 	RaftLink.noticeMessage('web', 'Hello world, JS');
 	os.clearInterval(h);
 	console.log("clear Interval Okey!"); 
-}, "dpp" ); 
+}, 25000,"dpp" ); 
 
-/*³¬Ê±¼ÆÊ±Æ÷*/
-os.setTimeout(2000,function (m) {
+/*è¶…æ—¶è®¡æ—¶å™¨*/
+os.setTimeout(function (m) {
     console.log("timeout without argments ", m); 	
-} ); 
+}, 2000 ); 

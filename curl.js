@@ -72,10 +72,10 @@ client.on('error', function(error, msg){
 
 
 
-os.setTimeout(10000,function () {
+os.setTimeout(function () {
 	client.close(); //等待完成,否则会被JS垃圾回收
     console.log("timeout completed"); 
-} ); 
+}, 10000 ); 
 
 console.log('start perform')
 client.perform(complete_cb);
