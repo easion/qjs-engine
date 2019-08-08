@@ -2,6 +2,9 @@ import * as RaftLink from "raftlink.so";
 import * as utils from "../res/utils.js";
 import * as homekit from "../res/hap.js";
 
+console.log(`scriptArgs : ${scriptArgs}`);
+console.log(`scriptConfigFile : ${scriptConfigFile}`);
+
 /*
 通讯协议仿绿米API
 https://github.com/lumi-openlcoud/opencloud-docs/blob/master/zh/docs/development/gateway-LAN-communication.md

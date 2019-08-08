@@ -58,7 +58,7 @@ function open()
 		return;
 	}
 	console.log("open result: " + uartFd);
-	rv = net.setUart(uartFd,115200,8,'N',1);
+	rv = net.setUart(uartFd,net.B115200,8,'N',1);
 	console.log("setUart result: " + rv);
 	rv = net.nonblock(uartFd);
 	console.log("nonblock result: " + rv);
