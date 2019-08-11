@@ -74,12 +74,13 @@ console.log(`scriptConfigFile : ${scriptConfigFile}`);
 ***定时器API**
 
 ```js
-var myVar = os.setInterval(function(){ alertFunc("First param", "Second param"); }, 2000);
-
-os.clearInterval(myVar);
-
+/*超时API*/
 var myTimer = os.setTimeout(function(){ alert("Hello"); }, 3000);
 os.clearTimeout(myTimer);
+
+/*定时器API，独家增加*/
+var myVar = os.setInterval(function(){ alertFunc("First param", "Second param"); }, 2000);
+os.clearInterval(myVar);
 ```
 
 QJS没有全局的setInterval/setTimeout/clearInterval/clearTimeout，请使用os名字空间的对应函数。
