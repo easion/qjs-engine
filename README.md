@@ -71,6 +71,20 @@ console.log(`scriptArgs : ${scriptArgs}`);
 console.log(`scriptConfigFile : ${scriptConfigFile}`);
 ```
 
+***定时器API**
+
+```js
+var myVar = os.setInterval(function(){ alertFunc("First param", "Second param"); }, 2000);
+
+os.clearInterval(myVar);
+
+var myTimer = os.setTimeout(function(){ alert("Hello"); }, 3000);
+os.clearTimeout(myTimer);
+```
+
+QJS没有全局的setInterval/setTimeout/clearInterval/clearTimeout，请使用os名字空间的对应函数。
+
+
 **脚本需使用UTF-8编码，否则包含中文或非ASCII字符会导致加载出错，并删除已经上传的主程序**
 
 #### 2.2 调试
