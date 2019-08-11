@@ -71,15 +71,15 @@ console.log(`scriptArgs : ${scriptArgs}`);
 console.log(`scriptConfigFile : ${scriptConfigFile}`);
 ```
 
-***定时器API**
+**定时器API**
 
 ```js
-/*超时API*/
-var myTimer = os.setTimeout(function(){ alert("Hello"); }, 3000);
+/*超时API,回调参数可选，只能1个*/
+var myTimer = os.setTimeout(function(arg){ console.log("Hello: " + arg); }, 3000,"argment");
 os.clearTimeout(myTimer);
 
 /*定时器API，独家增加*/
-var myVar = os.setInterval(function(){ alertFunc("First param", "Second param"); }, 2000);
+var myVar = os.setInterval(function(){ console.log("First param", "Second param"); }, 2000);
 os.clearInterval(myVar);
 ```
 
