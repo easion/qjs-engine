@@ -20,7 +20,7 @@
 
 ## 讨论
   
-[项目进度沟通群](http://sns.wifi-town.com/category/2/%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85)
+[项目进度沟通](http://sns.wifi-town.com/category/2/%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85)
  
   
 ## 联系管理员
