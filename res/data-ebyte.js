@@ -1,0 +1,48 @@
+/* example of JS module importing a C module */
+
+export const EByteType = {
+	
+	OP_SEND_CMD : 0xc0,
+	OP_RECV_CMD : 0x40,
+
+	OP_SEND_SIG : 0xc1,
+	OP_RECV_SIG : 0x41,
+
+	OP_SEND_DATA : 0xc2,
+	OP_RECV_DATA : 0x42
+};
+
+export var EByteCommand = {
+
+	CMD_EBYTE_SET_NET_KEY : 0x00,
+	CMD_EBYTE_GET_NET_KEY : 0x01,
+	CMD_EBYTE_SET_APP_KEY : 0x02,
+	CMD_EBYTE_GET_APP_KEY : 0x03,
+	CMD_EBYTE_SET_NET_ADDRESS : 0x04,
+	CMD_EBYTE_GET_NET_ADDRESS : 0x05,
+	//
+	CMD_EBYTE_SET_NET_FILTER : 0x06,
+	CMD_EBYTE_DEL_NET_FILTER : 0x07,
+	CMD_EBYTE_GET_NET_FILTER : 0x08,
+	CMD_EBYTE_JOIN_NET : 0x09,
+
+	/*quickjs has BUG， can add more!*/
+	CMD_EBYTE_SET_UART : 0x0e, //波特率
+	CMD_EBYTE_GET_UART : 0x0f,
+
+	//
+	CMD_EBYTE_SET_POWER : 0x12, //功率
+	CMD_EBYTE_GET_POWER : 0x13,
+	CMD_EBYTE_GET_MAC  : 0x11,
+	CMD_EBYTE_REBOOT_HW  : 0x14,
+	CMD_EBYTE_RESET_HW  : 0x15,
+	CMD_EBYTE_HW_VERSION  : 0x16,
+};
+
+/*
+
+*/
+/*
+
+
+*/
