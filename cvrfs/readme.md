@@ -21,13 +21,12 @@
 
 #### 视频上传/下载测试
 
-视频已经支持定位
+ - 视频已经支持定位
 ![Pandao editor.md](demo.png "Pandao editor.md")
 
 
 #### 图片上传下载测试
 
-视频已经支持定位
 ![Pandao editor.md](demo2.png "Pandao editor.md")
 
 
