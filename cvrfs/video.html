@@ -130,6 +130,18 @@
 	}
 
 	var player = null;
+	var file_list = [];
+	function lookup_for_file_name(id)
+	{
+		for (var i=0; i<file_list.length; i++)
+		{
+			if (file_list[i].first_cluster == id)
+			{
+				return file_list[i].name;
+			}
+		}
+		return null;
+	}
 
          //初始化fileinput
          var FileInput = function () {
@@ -180,13 +192,18 @@
          
          function writeElement(target, element, autoplay) {
          	var type = $(element).eq(0).attr('class');
-         	var id1 = $(element).parent().attr('class');
+         	var id1 = $(element).parent().attr('class');         
          
-         	//return;
-         
-         	var fname = id1.split(' ')[1];
+         	var fid = id1.split(' ')[1];
          	var value;
+
+			fname = lookup_for_file_name(Number(fid));
+			if (!fname)
+			{
+				return;
+			}
          	console.log(" id1 found: " + id1 + ", fname " + fname);
+
          	var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/'+fname;
 
 			var ext = getFileExtension(fname);         
@@ -282,7 +299,7 @@
                     '</a>';
             //}
             var HtmlElement =
-                '<div onclick="displayCarousel(event);" class="content2 ' + Content.name + ' content-lib">' +
+                '<div onclick="displayCarousel(event);" class="content2 ' + Content.first_cluster + ' content-lib">' +
                 '   <img width="120" height="80" title="' + Content.name + '"' +
                 '       class="' + Class + '"' +
                 '       id="content_' + id + '"' +
@@ -302,6 +319,8 @@
          		//showCarousel(libContents,i);
          		new_content += makeHtmlContentElement(libContents[i], i);
          	}
+
+			file_list = libContents;
          
          	new_content += '<p></p>';
          	document.getElementById("itemCarousel").innerHTML = new_content;

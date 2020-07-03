@@ -112,19 +112,19 @@ static int cvr_read_dir(cJSON *json, const char *dirpath)
 
 	while ((e = cvr_fs_read_dir(root, NULL)) != NULL)
 	{
-		cJSON *success2 = cJSON_CreateObject();
+		cJSON *f_item = cJSON_CreateObject();
 		if ((e->attribute & CVR_FS_ATTR_VIDEO_FILE) == CVR_FS_ATTR_VIDEO_FILE)
 		{
-			cJSON_AddStringToObject(success2, "type", "video");
+			cJSON_AddStringToObject(f_item, "type", "video");
 		}
 		else if ((e->attribute & CVR_FS_ATTR_INDEX_FILE) == CVR_FS_ATTR_INDEX_FILE){
-			cJSON_AddStringToObject(success2, "type", "index");
+			cJSON_AddStringToObject(f_item, "type", "index");
 		}
 		else if ((e->attribute & CVR_FS_ATTR_DIR) == CVR_FS_ATTR_DIR){
-			cJSON_AddStringToObject(success2, "type", "dir");
+			cJSON_AddStringToObject(f_item, "type", "dir");
 		}
 		else{
-			cJSON_AddStringToObject(success2, "type", "unknow");
+			cJSON_AddStringToObject(f_item, "type", "unknow");
 		}
 
 		char tmp[128];
@@ -133,14 +133,14 @@ static int cvr_read_dir(cJSON *json, const char *dirpath)
 			e->atime.hour,e->atime.min,e->atime.sec
 			);
 
-		cJSON_AddStringToObject(success2, "name", e->long_name);
-		cJSON_AddStringToObject(success2, "time", tmp);
-		cJSON_AddNumberToObject(success2, "size", e->file_size);
-		cJSON_AddNumberToObject(success2, "attribute", e->attribute);
-		cJSON_AddNumberToObject(success2, "pre_allocated", e->alloc_size);
-		cJSON_AddNumberToObject(success2, "channel", e->channel);
-		cJSON_AddNumberToObject(success2, "first_cluster", e->first_cluster);
-		cJSON_AddItemToArray(json, success2);
+		cJSON_AddStringToObject(f_item, "name", e->long_name);
+		cJSON_AddStringToObject(f_item, "time", tmp);
+		cJSON_AddNumberToObject(f_item, "size", e->file_size);
+		cJSON_AddNumberToObject(f_item, "attribute", e->attribute);
+		cJSON_AddNumberToObject(f_item, "pre_allocated", e->alloc_size);
+		cJSON_AddNumberToObject(f_item, "channel", e->channel);
+		cJSON_AddNumberToObject(f_item, "first_cluster", e->first_cluster);
+		cJSON_AddItemToArray(json, f_item);
 		count++;
 	}
 	cvr_fs_file_seek(root, 0,SEEK_SET);
@@ -470,14 +470,15 @@ header_value(multipart_parser *p, const char *data, size_t len)
 		{
 			char tmp[1024];
 			memset(tmp,0,sizeof(tmp));
-			sscanf(data, "filename=\"%s\"", tmp);
+			strncpy(tmp,data+10,sizeof(tmp)-2);
+			//sscanf(data, "filename=\"%s\"", tmp);
 			for (int x=0; tmp[x] ; x++){
-				if (tmp[x] == '"')
-				{
+				if (tmp[x] == '"'){
 					tmp[x]  = 0;
 				}
 			}
-			asprintf(&state->filename, "%x_%s",(uint16_t)time(NULL), tmp);
+			//asprintf(&state->filename, "%x_%s",(uint16_t)time(NULL), tmp);
+			state->filename = strdup(tmp);
 			LOGI(" --> Filename '%s'", state->filename);
 			state->parttype = PART_FILEDATA;
 		}
