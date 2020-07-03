@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="zh-CN">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <!-- Bootstrap CSS -->
+      <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" />
+      <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+      <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-fileinput/5.1.0/css/fileinput.min.css" rel="stylesheet" />
+      <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js"></script>
+      <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap-fileinput/5.1.0/js/fileinput.min.js"></script>
+      <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap-fileinput/5.1.0/js/locales/zh.js"></script>
+      <link href="https://cdn.bootcdn.net/ajax/libs/video.js/7.8.3/video-js.min.css" rel="stylesheet" />
+      <script src="https://cdn.bootcdn.net/ajax/libs/video.js/7.8.3/video.min.js"></script>
+      <title>视频上传</title>
+   </head>
+   <body>
+      <div class="container">
+         <form class="form-signin" id="form">
+            <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+               <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+               <span class="navbar-toggler-icon"></span>
+               </button>
+               <a class="navbar-brand" href="#">
+                  <h1 class="h3 mb-3 font-weight-normal">控制台</h1>
+               </a>
+            </nav>
+            <div class="alert alert-primary" role="alert">
+               <button type="button" class="close" data-dismiss="alert">&times;</button>
+               <h4>信息</h4>
+               <span id="current_info" class="label label-success"></span>
+            </div>
+            <hr>
+            <div class="card" style="width: 100%;">
+               <div class="card-body">
+                  <h5 class="card-title">上传视频文件</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">Upload Video</h6>
+                  <p class="card-text">您可以在此上传或者删除已经上传的文件内容.</p>
+                  <p>
+                     <a class="btn btn-primary" data-toggle="collapse" href="#DiskInfo" role="button" aria-expanded="false" aria-controls="DiskInfo">
+                     显示存储详情
+                     </a>
+                     <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#fileList" aria-expanded="false" aria-controls="fileList">
+                     文件详情
+                     </button>
+                  </p>
+                  <div class="collapse" id="DiskInfo">
+                     <div class="info" id="storageinfo">
+                     </div>
+                  </div>
+                  <div class="progress">
+                     <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="collapse" id="fileList">
+                     <div class="row">
+                        <div class="col-lg-12">
+                           <span id="#contentName">文件列表</span>
+                           <div id="divContent">
+                              <div class="row" id="itemCarousel">
+                                 <center>
+                                    没有找到文件，请上传
+                                 </center>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <p></p>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-6" >
+                  <video id="my-player"
+                     class="video-js vjs-default-skin vjs-big-play-centered vjs-16-9"
+                     controls
+                     preload="auto"
+                     poster="//vjs.zencdn.net/v/oceans.png"
+                     data-setup='{}' >
+                     <source id="mp4_src" src="/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/9f83_dzq.mp4" type="video/mp4">
+                  </video>
+               </div>
+               <div class="col-md-6" >
+                  <div class="form-group">
+                     <label for="exampleFormControlFile1">上传媒体文件</label>
+                     <input type="file" multiple class="file-loading form-control-file"  name="txt_file" id="txt_file" >
+                  </div>
+               </div>
+            </div>
+            <p class="mt-5 mb-3 text-muted text-center">&copy; 2014-2020 版权所有 未经许可不得重复分发</p>
+         </form>
+      </div>
+      <!-- MODAL CAROUSEL-->
+      <div class="modal fade bs-example-modal-lg" id="carouselModal" tabindex="-1" role="dialog"
+         aria-labelledby="myLargeModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+               <div class="modal-header" style="background-color: black; border-color: black; padding-bottom: 5px;">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true"
+                     style="color: #FFFFFF;">&times;</span><span
+                     class="sr-only">Close</span></button>
+                  <h5 id="titleContent" style="background-color: black; color: #CCC;"></h5>
+               </div>
+               <!--<div class="modal-body" style="background-color: black;"> -->
+               <div id="carousel-example-generic" class="carousel slide" data-ride="carousel" data-interval="false" style="background-color: black;">
+                  <!-- Indicators add class active on li --> 
+                  <ol class="carousel-indicators">
+                  </ol>
+                  <!-- Wrapper for slides add class active on item -->
+                  <div class="carousel-inner" >
+                  </div>
+                  <!-- Controls -->
+                  <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                  <span class="glyphicon glyphicon-chevron-left"></span>
+                  </a>
+                  <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                  <span class="glyphicon glyphicon-chevron-right"></span>
+                  </a>
+               </div>
+               <!-- Carousel -->
+               <!-- </div> -->
+            </div>
+         </div>
+      </div>
+      <script>
+
+	function getFileExtension(filename) {
+	  return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
+	}
+
+	var player = null;
+
+         //初始化fileinput
+         var FileInput = function () {
+         	var oFile = new Object();
+         
+         	//初始化fileinput控件（第一次初始化）
+         	oFile.Init = function(ctrlName, uploadUrl) {
+         	var control = $('#' + ctrlName);
+         
+         	//初始化上传控件的样式
+         	control.fileinput({
+         		language: 'zh', //设置语言
+         		uploadUrl: uploadUrl, //上传的地址
+         		allowedFileExtensions: ['mp4', 'flv','mov', 'webm', 'avi', 'ogg','txt','jpg','png','jpeg'],//接收的文件后缀
+         		showUpload: true, //是否显示上传按钮
+         		showCaption: false,//是否显示标题
+         		browseClass: "btn btn-primary", //按钮样式     
+         		//dropZoneEnabled: false,//是否显示拖拽区域
+         		//minImageWidth: 50, //图片的最小宽度
+         		//minImageHeight: 50,//图片的最小高度
+         		//maxImageWidth: 1000,//图片的最大宽度
+         		//maxImageHeight: 1000,//图片的最大高度
+         		//maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小
+         		//minFileCount: 0,
+         		maxFileCount: 10, //表示允许同时上传的最大文件个数
+         		enctype: 'multipart/form-data',
+         		validateInitialCount:true,
+         		previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+         		msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+         	});
+         
+         	//导入文件上传完成之后的事件
+         	$("#txt_file").on("fileuploaded", function (event, data, previewId, index) {
+         		var data = data.response.lstOrderImport;
+         		if (data == undefined) {
+         			console.log('previewId ' + previewId);
+         			console.log('data --', data);
+         			console.log('event --', event);
+         			$("#current_info").html("上传文件成功");
+         			getLibraryContents();
+         			return;
+         		}
+         		
+         	  });
+         	}
+         	return oFile;
+         };
+         
+         function writeElement(target, element, autoplay) {
+         	var type = $(element).eq(0).attr('class');
+         	var id1 = $(element).parent().attr('class');
+         
+         	//return;
+         
+         	var fname = id1.split(' ')[1];
+         	var value;
+         	console.log(" id1 found: " + id1 + ", fname " + fname);
+         	var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/'+fname;
+
+			var ext = getFileExtension(fname);         
+			if ( ext === 'jpg' || ext === 'png'){
+				value = '<img title="'+fname+'" class="imgContent" src="'+ url + '" width="100%" height="100%">';
+			}
+			else if (ext === 'mp4') 
+			{
+				//var vid = document.getElementById("my-player");
+				player.src(url);
+				player.play();
+				console.log("video url: " + url);
+				return false;
+				
+				//value = '<video title="' + fname + '" '+ autoplay +' class="videoCarousel video-js vjs-default-skin" id="example_video_1" controls preload="none"  data-setup="{\'example_option\':true}"><source src="'+ url +'" type="video/mp4" width="100%" height="100%" /></video>';
+			}
+			else{
+				console.log("unknow value: " + fname);
+				return false;
+			}
+			$(target).append(value);
+	 
+			$("#carouselModal #titleContent").empty();
+			$("#carouselModal #titleContent").append($(".carousel-inner .active").children().eq(1).attr('title'));
+			return true;
+         }
+         
+         
+         function displayCarousel(event){
+         	var childrenArray = $("#itemCarousel").children();
+         	$(".carousel-indicators").empty();
+         	$(".carousel-inner").empty();
+         
+         	childrenArray.each(function(index, element) {         	
+         	});
+         
+         	if (childrenArray.length > 0)
+         	{
+         		var items = '';
+         		var indicators = '';
+         
+         		var i = 0;
+         		childrenArray.each(function() {
+         			//console.log("line " + $(this).children().eq(0).get(0));
+         
+         			if ($(event.currentTarget).children().eq(0).get(0) == $(this).children().eq(0).get(0))
+         			{
+         				$(".carousel-inner").append('<div id="item_' + i + '"class="item frame active"><div class="carousel-caption"></div></div>');
+         				$(".carousel-indicators").append('<li class="active" data-target="#carousel-example-generic" data-slide-to="' + i + '"></li>');
+
+         				writeElement($('#item_' + i), $(this).children(), 'autoplay');
+         			}
+         			else
+         			{
+         				//$(".carousel-indicators").append('<li data-target="#carousel-example-generic" data-slide-to="' + i + '"></li>');
+         				//$(".carousel-inner").append('<div id="item_' + i + '"class="item frame"><div class="carousel-caption"></div></div>');
+         				//writeElement($('#item_' + i), $(this).children(), '');
+         			}
+         			i++;
+         		});
+         		$("#carouselModal").modal('show');
+         	}
+         }
+         
+         function makeHtmlContentElement(Content, id) {
+            var Class;
+            var Button = '';
+         
+			 if (Content.type === 'dir')
+			 {
+				return;
+			 }
+			 
+			 Content.option_id = getFileExtension(Content.name);
+			 //Content.id = 13;
+			 
+			 var path = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/' + Content.name;
+         
+            if (Content.option_id == 'mp4') {
+                Class = 'videoContent';
+            } else if (Content.option_id == 'jpg' || Content.option_id == 'png') {
+                Class = 'imgContent';
+            }
+            //if (Content.deletable == 1) {
+                Button1 =
+                    '<button onclick="deleteFile(\''+Content.name+'\');" type="button" class="btn btn-xs btn-danger btn-delete btn-delete-content">' +
+                    '   <i class="fa fa-times"></i>' +
+                    '</button>';
+         
+         		Button2 =
+                    '<a onclick="deleteFile(\''+Content.name+'\');"  class="btn btn-xs btn-danger btn-delete btn-delete-content">' +
+                    '   <i class="fa fa-times"></i>' +
+                    '</a>';
+            //}
+            var HtmlElement =
+                '<div onclick="displayCarousel(event);" class="content2 ' + Content.name + ' content-lib">' +
+                '   <img width="120" height="80" title="' + Content.name + '"' +
+                '       class="' + Class + '"' +
+                '       id="content_' + id + '"' +
+                '       src= "' + path + '">' +
+                '   <p>' + Content.name  + '</p>' +
+                '</div>'+ Button1;
+         //console.log("Html: " + HtmlElement);
+            return (HtmlElement);
+         }
+         
+         function getLibraryContents() {
+         $.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/dirs?path=/sda1", function(libContents){
+         	var new_content = '';
+         	//console.log("get picture: ", libContents);
+         	for (var i=0; i<libContents.length; i++)
+         	{
+         		//showCarousel(libContents,i);
+         		new_content += makeHtmlContentElement(libContents[i], i);
+         	}
+         
+         	new_content += '<p></p>';
+         	document.getElementById("itemCarousel").innerHTML = new_content;
+         	//$('.carousel').carousel({interval: 2500});
+         });
+         
+         }
+         
+         /**
+         *
+         */
+         function libraryContentDisplayDeleteButton() {
+            $(".content2 .btn-delete-content").toggle(false);
+            $(".content2").hover(
+                function (event) {
+                    $(event.target).css('cursor', 'pointer');
+                    //$(event.currentTarget).css('background-color', '#ccc');
+                    $(event.currentTarget).find(".btn-delete-content").toggle(true);
+                },
+                function (event) {
+                    //$(event.currentTarget).css('background-color', '#fff');
+                    $(event.currentTarget).find(".btn-delete-content").toggle(false);
+                });   
+         
+         }
+         
+         
+         function deleteFile( path)
+         {
+         var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/rm';
+
+		 console.log("Delete file " + path);
+         $.getJSON(url, {path: path,type: "video"}, function (response) {         
+         	if (response.error)
+         		console.log(response.error);
+         	getLibraryContents();
+         	$("#current_info").html("删除文件"+path+"已经执行");
+         });
+         }
+         
+         $(document).ready(function(){
+         
+         	var options = {};
+         
+         	player = videojs('my-player', options, function onPlayerReady() {
+         	  videojs.log('Your player is ready!');
+         
+         	  // In this context, `this` is the player that was created by Video.js.
+         	  this.play();
+         
+         	  // How about an event listener?
+         	  this.on('ended', function() {
+         		videojs.log('Awww...over so soon?!');
+         	  });
+         	});
+         
+         	var oFileInput = new FileInput();
+         	oFileInput.Init("txt_file", "/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/upload");
+         
+         	libraryContentDisplayDeleteButton();
+         	getLibraryContents();	
+         	
+         	$("#reload_app").click(function(){
+         		$.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/reload_app", {sec:2}, function(json){
+         			console.log("Reload app: ", json);
+         		});
+         	});
+         
+         	$.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/sdinfo", function(json){
+         		console.log("get sd: ", json);
+         		var valeur = Math.round((json.used)*100 / json.total);
+				var oneM = 1024*1024;
+				var free = Math.round((json.total - json.used)/oneM);
+         		 $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur); 
+         		 $("#storageinfo").html("存储介质:"+json.device+",OEM 产商:"+json.oem+"<p>空间容量:" 
+				 + Math.round(json.total/oneM) + "M字节, 剩余" + free +"M字节");
+         	});
+			
+         
+         });
+         
+      </script>
+   </body>
+</html>
