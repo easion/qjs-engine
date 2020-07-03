@@ -71,7 +71,7 @@ extern char DEFAULT_USERNAME[34];
 static pid_t main_pid;
 
 /*
-AppKeyÓĞĞ§ĞÔ¼ì²é
+AppKeyæœ‰æ•ˆæ€§æ£€æŸ¥
 */
 static inline int is_valid_appid(const char* appid)
 {
@@ -148,7 +148,7 @@ static int cvr_read_dir(cJSON *json, const char *dirpath)
 }
 
 /*
-»ñÈ¡Ö±´æÎÄ¼ş¸ùÄ¿Â¼ÎÄ¼şÁĞ±í
+è·å–ç›´å­˜æ–‡ä»¶æ ¹ç›®å½•æ–‡ä»¶åˆ—è¡¨
 */
 static int api_get_dirs_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -169,7 +169,7 @@ static int api_get_dirs_cb(struct http_connection *connection, const struct http
 }
 
 /*
-»ñÈ¡Ö±´æÎÄ¼ş³¬¼¶¿éĞÅÏ¢
+è·å–ç›´å­˜æ–‡ä»¶è¶…çº§å—ä¿¡æ¯
 */
 static int api_get_sdinfo_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -197,7 +197,7 @@ static int api_get_sdinfo_cb(struct http_connection *connection, const struct ht
 }
 
 /*
-ÏÂÔØLinuxÎÄ¼şÏµÍ³ÄÚµÄÎÄ¼ş
+ä¸‹è½½Linuxæ–‡ä»¶ç³»ç»Ÿå†…çš„æ–‡ä»¶
 */
 static int api_get_file_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -218,7 +218,7 @@ static int api_get_file_cb(struct http_connection *connection, const struct http
 	return 1;
 }
 /*
-ÏÂÔØCVRÖ±´æÎÄ¼ş
+ä¸‹è½½CVRç›´å­˜æ–‡ä»¶
 */
 static int api_get_cvr_file_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -238,7 +238,7 @@ static int api_get_cvr_file_cb(struct http_connection *connection, const struct 
 }
 
 /*
-É¾³ıÖ±´æÎÄ¼ş
+åˆ é™¤ç›´å­˜æ–‡ä»¶
 */
 static int api_rm_file_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -286,7 +286,7 @@ static void * make_fs_thread_enry(void *arg)
 }
 
 /*
-¸ñÊ½»¯CVRÖ±´æÎÄ¼ş
+æ ¼å¼åŒ–CVRç›´å­˜æ–‡ä»¶
 */
 static int api_make_fs_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -308,7 +308,7 @@ static int api_make_fs_cb(struct http_connection *connection, const struct http_
 	}
 
 	pthread_t thread_id; 
-	/*ĞèÒª´´½¨Ïß³Ì´¦Àí£¬·ñÔò»áµ¼ÖÂ½ø³Ì×èÈû£¬±»¼àÊÓ½ø³ÌÇ¿ÖÆkill*/
+	/*éœ€è¦åˆ›å»ºçº¿ç¨‹å¤„ç†ï¼Œå¦åˆ™ä¼šå¯¼è‡´è¿›ç¨‹é˜»å¡ï¼Œè¢«ç›‘è§†è¿›ç¨‹å¼ºåˆ¶kill*/
 	int rc = pthread_create(&thread_id, NULL, 
 		make_fs_thread_enry, strdup(path)); 
 	if (rc < 0)
@@ -350,7 +350,7 @@ static int api_copy_out_cb(struct http_connection *connection, const struct http
 	}
 
 	pthread_t thread_id; 
-	/*ĞèÒª´´½¨Ïß³Ì´¦Àí£¬·ñÔò»áµ¼ÖÂ½ø³Ì×èÈû£¬±»¼àÊÓ½ø³ÌÇ¿ÖÆkill*/
+	/*éœ€è¦åˆ›å»ºçº¿ç¨‹å¤„ç†ï¼Œå¦åˆ™ä¼šå¯¼è‡´è¿›ç¨‹é˜»å¡ï¼Œè¢«ç›‘è§†è¿›ç¨‹å¼ºåˆ¶kill*/
 	int rc = pthread_create(&thread_id, NULL, copy_out_thread_enry, strdup(path)); 
 	if (rc < 0)
 	{
@@ -363,7 +363,7 @@ static int api_copy_out_cb(struct http_connection *connection, const struct http
 }
 
 /*
-½«CVRÖ±´æÎÄ¼ş¸´ÖÆ³öµ½LinuxÎÄ¼şÏµÍ³
+å°†CVRç›´å­˜æ–‡ä»¶å¤åˆ¶å‡ºåˆ°Linuxæ–‡ä»¶ç³»ç»Ÿ
 */
 int file_copy_out(const char *filename, const char *dir)
 {
@@ -412,7 +412,7 @@ int file_copy_out(const char *filename, const char *dir)
 }
 
 /*
-ÉÏ´«¹¦ÄÜµ÷ÓÃ
+ä¸Šä¼ åŠŸèƒ½è°ƒç”¨
 */
 static int
 header_field(multipart_parser *p, const char *data, size_t len)
@@ -708,7 +708,7 @@ static void upload_connection_read_cb(void *connection, const void* data, int da
 }
 
 /*
-HTTPÉÏ´«ÎÄ¼şµ½CVRÖ±´æÏµÍ³
+HTTPä¸Šä¼ æ–‡ä»¶åˆ°CVRç›´å­˜ç³»ç»Ÿ
 */
 static int api_upload_file_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
 {
@@ -730,7 +730,7 @@ static int api_upload_file_cb(struct http_connection *connection, const struct h
 }
 
 /*
-¿çÎÄ¼şÏµÍ³·ÃÎÊ¶ÔÏóÊµÏÖ
+è·¨æ–‡ä»¶ç³»ç»Ÿè®¿é—®å¯¹è±¡å®ç°
 */
 
 static int cvr_fd_seek_cb(struct file_system_io_interface *ri, off_t pos, int s)
@@ -794,7 +794,7 @@ static const struct file_op_interface _cvr_op = {
 };
 
 /*
-ÎªCVRÖ±´æÏµÍ³¹¹½¨¿çÎÄ¼şÏµÍ³·ÃÎÊ¶ÔÏó£¬linuxÎÄ¼şÏµÍ³ÒÔÀàËÆµÄĞÎÌ¬´´½¨
+ä¸ºCVRç›´å­˜ç³»ç»Ÿæ„å»ºè·¨æ–‡ä»¶ç³»ç»Ÿè®¿é—®å¯¹è±¡ï¼Œlinuxæ–‡ä»¶ç³»ç»Ÿä»¥ç±»ä¼¼çš„å½¢æ€åˆ›å»º
 */
 static void set_file_read_interface_for_cvrfs(struct file_system_io_interface* fp, struct cvrfs_inode_object *ino)
 {

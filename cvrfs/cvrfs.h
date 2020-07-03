@@ -27,7 +27,7 @@ int cvr_fs_delete_inode(struct cvrfs_inode_object *ino);
 
 /*directory*/
 struct cvrfs_inode_object *cvr_fs_open_dir(struct cvrfs_inode_object *parent,const char *name);
-/*��ʱ��֧�ֶ༶Ŀ¼*/
+/*暂时不支持多级目录*/
 struct cvrfs_inode_object *cvr_fs_read_dir(struct cvrfs_inode_object *ino, uint64_t *offset);
 
 /*file*/
