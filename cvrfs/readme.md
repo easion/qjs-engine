@@ -22,12 +22,12 @@
 #### 视频上传/下载测试
 
  - 视频已经支持定位
-![Pandao editor.md](demo.png "Pandao editor.md")
+![视频DEMO](demo.png "视频DEMO")
 
 
 #### 图片上传下载测试
 
-![Pandao editor.md](demo2.png "Pandao editor.md")
+![图片DEMO](demo2.png "图片DEMO")
 
 
   - DEMO可支持RTSP摄像头存储mp4视频文件到CVR。
