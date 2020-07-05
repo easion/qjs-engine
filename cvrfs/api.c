@@ -507,6 +507,7 @@ static int data_begin_cb(multipart_parser *p)
 		int rc;
 
 		if (!state->filename){
+			state->has_error = 1;
 			LOGE( "File data without name");
 			return -1;
 		}
@@ -736,7 +737,7 @@ static int api_upload_file_cb(struct http_connection *connection, const struct h
 
 static int cvr_fd_seek_cb(struct file_system_io_interface *ri, off_t pos, int s)
 {
-	LOGI("seek %d -> %lld", s,pos);
+	//LOGI("seek %d -> %lld", s,pos);
 	return cvr_fs_file_seek(ri->private_data, pos,s);
 }
 
@@ -856,9 +857,21 @@ static int cvr_fs_open_fp_file(const char *filename, const char *mode, struct fi
 	struct cvrfs_inode_object *root = cvr_fs_root_get(fs);
 	char *file = basename(filename);
 
+	if (mode[0] == 'w')
+	{
+		int rc;
+		rc = cvr_fs_create_file(root, file, 10*1024*1024);
+		if (rc < 0)
+		{
+			LOGI("Create cvr failed for %s", file);
+			return -1;
+		}
+	}
+
 	ino = cvr_fs_open_file(root,file,mode);
 	if (!ino)
 	{
+		LOGI("Open cvr file %s fail", file);
 		return -1;
 	}
 	set_file_read_interface_for_cvrfs(fp, ino);

@@ -33,7 +33,7 @@ struct cvrfs_inode_object *cvr_fs_read_dir(struct cvrfs_inode_object *ino, uint6
 /*file*/
 struct cvrfs_inode_object *cvr_fs_open_file(struct cvrfs_inode_object *parent,const char *name, const char *mode);
 int cvr_fs_close_inode(struct cvrfs_inode_object *ino);
-int cvr_fs_file_seek(struct cvrfs_inode_object *ino, uint64_t pos, int which);
+int64_t cvr_fs_file_seek(struct cvrfs_inode_object *ino, uint64_t pos, int which);
 int cvr_fs_file_truncate(struct cvrfs_inode_object *ino, uint64_t new_size);
 int cvr_fs_file_read(struct cvrfs_inode_object *ino, void *buffer, uint64_t size);
 int cvr_fs_file_write(struct cvrfs_inode_object *ino, const void *buffer, int64_t size);

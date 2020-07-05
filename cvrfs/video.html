@@ -18,21 +18,34 @@
    </head>
    <body>
       <div class="container">
-         <form class="form-signin" id="form">
-            <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-               <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-               <span class="navbar-toggler-icon"></span>
-               </button>
-               <a class="navbar-brand" href="#">
-                  <h1 class="h3 mb-3 font-weight-normal">控制台</h1>
-               </a>
-            </nav>
-            <div class="alert alert-primary" role="alert">
-               <button type="button" class="close" data-dismiss="alert">&times;</button>
-               <h4>信息</h4>
-               <span id="current_info" class="label label-success"></span>
+
+		<div class="row">
+               <div class="col-md-6" >
+			    <div class="alert alert-primary" role="alert">
+				   <button type="button" class="close" data-dismiss="alert">&times;</button>
+				   <h5>信息</h4>
+				   <span id="current_info" class="label label-success"></span>
+				</div>
+
+                  <video id="my-player"
+                     class="video-js vjs-default-skin vjs-big-play-centered vjs-16-9"
+                     controls
+                     preload="auto"
+                     poster="//vjs.zencdn.net/v/oceans.png"
+                     data-setup='{}' >
+                     <source id="mp4_src" src="/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/9f83_dzq.mp4" type="video/mp4">
+                  </video>
+               </div>
+               <div class="col-md-6" >
+                  <div class="form-group">
+                     <label for="exampleFormControlFile1">上传媒体文件</label>
+                     <input type="file" multiple class="file-loading form-control-file"  name="txt_file" id="txt_file" >
+                  </div>
+               </div>
             </div>
-            <hr>
+
+         <form class="form-signin" id="form">            
+           
             <div class="card" style="width: 100%;">
                <div class="card-body">
                   <h5 class="card-title">上传视频文件</h5>
@@ -44,6 +57,14 @@
                      </a>
                      <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#fileList" aria-expanded="false" aria-controls="fileList">
                      文件详情
+                     </button>
+
+					 <button class="btn btn-success" id="start_storage" type="button">
+                     启动录像存储
+                     </button>
+
+					 <button class="btn btn-success" id="stop_storage" type="button">
+                     停止录像存储
                      </button>
                   </p>
                   <div class="collapse" id="DiskInfo">
@@ -70,24 +91,7 @@
                   <p></p>
                </div>
             </div>
-            <div class="row">
-               <div class="col-md-6" >
-                  <video id="my-player"
-                     class="video-js vjs-default-skin vjs-big-play-centered vjs-16-9"
-                     controls
-                     preload="auto"
-                     poster="//vjs.zencdn.net/v/oceans.png"
-                     data-setup='{}' >
-                     <source id="mp4_src" src="/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/9f83_dzq.mp4" type="video/mp4">
-                  </video>
-               </div>
-               <div class="col-md-6" >
-                  <div class="form-group">
-                     <label for="exampleFormControlFile1">上传媒体文件</label>
-                     <input type="file" multiple class="file-loading form-control-file"  name="txt_file" id="txt_file" >
-                  </div>
-               </div>
-            </div>
+            
             <p class="mt-5 mb-3 text-muted text-center">&copy; 2014-2020 版权所有 未经许可不得重复分发</p>
          </form>
       </div>
@@ -123,15 +127,16 @@
             </div>
          </div>
       </div>
-      <script>
+      <script>	
+	var player = null;
+	var player_uri = null;
+	var file_list = [];
 
 	function getFileExtension(filename) {
 	  return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
 	}
 
-	var player = null;
-	var file_list = [];
-	function lookup_for_file_name(id)
+	function lookupFileNamebyInode(id)
 	{
 		for (var i=0; i<file_list.length; i++)
 		{
@@ -197,7 +202,7 @@
          	var fid = id1.split(' ')[1];
          	var value;
 
-			fname = lookup_for_file_name(Number(fid));
+			fname = lookupFileNamebyInode(Number(fid));
 			if (!fname)
 			{
 				return;
@@ -212,13 +217,12 @@
 			}
 			else if (ext === 'mp4') 
 			{
-				//var vid = document.getElementById("my-player");
-				player.src(url);
-				player.play();
-				console.log("video url: " + url);
+				setVideoUri(url);
+				setTimeout(function(){
+					$("#carouselModal").modal('hide');
+				}, 200);
 				return false;
 				
-				//value = '<video title="' + fname + '" '+ autoplay +' class="videoCarousel video-js vjs-default-skin" id="example_video_1" controls preload="none"  data-setup="{\'example_option\':true}"><source src="'+ url +'" type="video/mp4" width="100%" height="100%" /></video>';
 			}
 			else{
 				console.log("unknow value: " + fname);
@@ -267,6 +271,13 @@
          		$("#carouselModal").modal('show');
          	}
          }
+
+		 function setVideoUri(url) {
+			player_uri = url;
+			player.src(url);
+			player.play();
+			console.log("video url: " + url);
+		 }
          
          function makeHtmlContentElement(Content, id) {
             var Class;
@@ -277,14 +288,19 @@
 				return;
 			 }
 			 
-			 Content.option_id = getFileExtension(Content.name);
+			 Content.option_type = getFileExtension(Content.name);
 			 //Content.id = 13;
 			 
 			 var path = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/' + Content.name;
          
-            if (Content.option_id == 'mp4') {
+            if (Content.option_type == 'mp4') {
+				if (!player_uri)
+				{
+					setVideoUri(path);
+				}
                 Class = 'videoContent';
-            } else if (Content.option_id == 'jpg' || Content.option_id == 'png') {
+				path = '/video.jpg';
+            } else if (Content.option_type == 'jpg' || Content.option_type == 'png') {
                 Class = 'imgContent';
             }
             //if (Content.deletable == 1) {
@@ -383,9 +399,15 @@
          	libraryContentDisplayDeleteButton();
          	getLibraryContents();	
          	
-         	$("#reload_app").click(function(){
-         		$.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/reload_app", {sec:2}, function(json){
-         			console.log("Reload app: ", json);
+         	$("#start_storage").click(function(){
+         		$.getJSON("/storage/1/start", function(json){
+         			console.log("start storage: ", json);
+         		});
+         	});
+
+			$("#stop_storage").click(function(){
+         		$.getJSON("/storage/1/stop", function(json){
+         			console.log("stop storage: ", json);
          		});
          	});
          
