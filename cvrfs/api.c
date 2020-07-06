@@ -50,7 +50,7 @@ struct upload_state
 	enum part parttype;
 	char *filename;
 	bool filedata;
-	bool has_error;
+	int has_error;
 	struct cvrfs_inode_object *cvr_handle;
 	int sent_rsp;
 	uint64_t file_size;
@@ -63,7 +63,9 @@ int send_json_response_and_free(struct http_connection *connection, cJSON *datar
 cJSON * sendError(int type, const char* path, const char* description) ;
 cJSON *generateTargetPutResponse(cJSON *body, const char* targetBase);
 static int cvr_read_dir(cJSON *json, const char *dpath);
-static void connection_send_rsp(void *connection, const char *body);
+static void connection_send_txt_rsp(void *connection, const char *body);
+static void connection_send_json_rsp(void *connection, const char *body);
+
 int file_copy_out(const char *filename, const char *dir);
 static int cvr_fs_open_fp_file(const char *filename, const char *mode, struct file_system_io_interface* fp);
 
@@ -187,6 +189,8 @@ static int api_get_sdinfo_cb(struct http_connection *connection, const struct ht
 		cJSON_AddNumberToObject(resp, "used_clusters", fs->used_clusters);
 		cJSON_AddNumberToObject(resp, "total_clusters", fs->n_clusters);
 		cJSON_AddNumberToObject(resp, "version", fs->fs_version);
+		cJSON_AddNumberToObject(resp, "file_blocks", fs->used_file_blocks);
+		cJSON_AddNumberToObject(resp, "distribution_pile", fs->last_alloc_cluster);
 		cJSON_AddNumberToObject(resp, "used", 
 			(unsigned long long)fs->used_clusters*fs->block_size);
 		cJSON_AddNumberToObject(resp, "total", 
@@ -256,10 +260,10 @@ static int api_rm_file_cb(struct http_connection *connection, const struct http_
 	int rc = cvr_fs_delete_file(root,path);
 	if (rc < 0)
 	{
-		connection_send_rsp(connection, "FAIL");
+		connection_send_json_rsp(connection, "FAIL");
 	}
 	else{
-		connection_send_rsp(connection, "OK");
+		connection_send_json_rsp(connection, "OK");
 	}
 	return 1;
 }
@@ -274,6 +278,12 @@ static void * make_fs_thread_enry(void *arg)
 
 	if (path != NULL)
 	{	
+		char cmd[512];
+		snprintf(cmd, sizeof(cmd), "umount %s", path);
+		system(cmd);
+
+		snprintf(cmd, sizeof(cmd), "umount /mnt/");
+		system(cmd);
 		LOGI("CVR make fs entry %s", path);
 		//create_fs("/mnt/sda1/cvrfs.img",1024*1024*1024);
 		cvr_fs_make(path, NULL, CLUSTER_SIZE);
@@ -307,16 +317,18 @@ static int api_make_fs_cb(struct http_connection *connection, const struct http_
 		LOGI("umount fs OK");
 	}
 
+	
+
 	pthread_t thread_id; 
 	/*需要创建线程处理，否则会导致进程阻塞，被监视进程强制kill*/
 	int rc = pthread_create(&thread_id, NULL, 
 		make_fs_thread_enry, strdup(path)); 
 	if (rc < 0)
 	{
-		connection_send_rsp(connection, "FAIL");
+		connection_send_json_rsp(connection, "FAIL");
 	}
 	else{
-		connection_send_rsp(connection, "OK");
+		connection_send_json_rsp(connection, "OK");
 	}
 	return 1;
 }
@@ -354,10 +366,10 @@ static int api_copy_out_cb(struct http_connection *connection, const struct http
 	int rc = pthread_create(&thread_id, NULL, copy_out_thread_enry, strdup(path)); 
 	if (rc < 0)
 	{
-		connection_send_rsp(connection, "FAIL");
+		connection_send_json_rsp(connection, "FAIL");
 	}
 	else{
-		connection_send_rsp(connection, "OK");
+		connection_send_json_rsp(connection, "OK");
 	}
 	return 1;
 }
@@ -507,7 +519,7 @@ static int data_begin_cb(multipart_parser *p)
 		int rc;
 
 		if (!state->filename){
-			state->has_error = 1;
+			state->has_error = 2;
 			LOGE( "File data without name");
 			return -1;
 		}
@@ -653,7 +665,15 @@ static void upload_connection_destroy_cb(void *connection, void* arg)
 	multipart_parser_free(p);
 }
 
-static void connection_send_rsp(void *connection, const char *body)
+static void connection_send_json_rsp(void *connection, const char *body)
+{
+	cJSON *resp;
+	resp = cJSON_CreateObject();
+	cJSON_AddStringToObject(resp, "result", body);
+	send_json_response_and_free(connection, resp);	
+}
+
+static void connection_send_txt_rsp(void *connection, const char *body)
 {
 	struct http_headers *headers;
 
@@ -661,9 +681,8 @@ static void connection_send_rsp(void *connection, const char *body)
 	http_headers_set_header(headers, "Server", "RaftLink Homehub");
 	http_headers_set_header(headers, "Content-Type", "text/plain");
 	http_connection_send_response_with_body(connection, HTTP_OK, headers,
-								body, strlen(body));	
+								body, strlen(body));								
 }
-
 
 static void upload_connection_read_cb(void *connection, const void* data, int datalen)
 {
@@ -677,27 +696,34 @@ static void upload_connection_read_cb(void *connection, const void* data, int da
 		return;
 	}
 	struct upload_state *state = multipart_parser_get_param(p);
-	if (state->has_error)
-	{
-		LOGE("http_connection_get_read_object shutdown");
-		int fd = http_connection_get_fd(connection);
-		if (fd >= 0)
-		{
-			close(fd);
-		}
-		return;
-	}
+	
 
 	if (!data || !datalen)
 	{	
 		if (state->sent_rsp == 0)
 		{
 			state->sent_rsp = 1;
-			connection_send_rsp(connection, "{}");
+			connection_send_json_rsp(connection, "OK");
 		}
 		//http_connection_abort(connection);
 		return;
-	}	
+	}
+
+	if (state->has_error)
+	{		
+		if (state->has_error == 2)
+		{
+			return;
+		}
+		int fd = http_connection_get_fd(connection);
+		if (fd >= 0)
+		{
+			LOGE("upload shutdown fd %d", fd);
+			connection_send_json_rsp(connection, "OK");
+			close(fd);
+		}
+		return;
+	}
 
 	rem = multipart_parser_execute(p, data, datalen);
 	if (rem < datalen)

@@ -66,6 +66,10 @@
 					 <button class="btn btn-success" id="stop_storage" type="button">
                      停止录像存储
                      </button>
+
+					 <button class="btn btn-danger" id="format_storage" type="button">
+                     格式化sda1
+                     </button>
                   </p>
                   <div class="collapse" id="DiskInfo">
                      <div class="info" id="storageinfo">
@@ -128,25 +132,25 @@
          </div>
       </div>
       <script>	
-	var player = null;
-	var player_uri = null;
-	var file_list = [];
+		var player = null;
+		var player_uri = null;
+		var file_list = [];
 
-	function getFileExtension(filename) {
-	  return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
-	}
-
-	function lookupFileNamebyInode(id)
-	{
-		for (var i=0; i<file_list.length; i++)
-		{
-			if (file_list[i].first_cluster == id)
-			{
-				return file_list[i].name;
-			}
+		function getFileExtension(filename) {
+		  return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
 		}
-		return null;
-	}
+
+		function lookupFileNamebyInode(id)
+		{
+			for (var i=0; i<file_list.length; i++)
+			{
+				if (file_list[i].first_cluster == id)
+				{
+					return file_list[i].name;
+				}
+			}
+			return null;
+		}
 
          //初始化fileinput
          var FileInput = function () {
@@ -184,9 +188,12 @@
          		if (data == undefined) {
          			console.log('previewId ' + previewId);
          			console.log('data --', data);
-         			console.log('event --', event);
+         			
+					setTimeout(function(){
+						console.log('load Contents --');
+         				getLibraryContents();
+					}, 1000);
          			$("#current_info").html("上传文件成功");
-         			getLibraryContents();
          			return;
          		}
          		
@@ -198,19 +205,15 @@
          function writeElement(target, element, autoplay) {
          	var type = $(element).eq(0).attr('class');
          	var id1 = $(element).parent().attr('class');         
-         
          	var fid = id1.split(' ')[1];
          	var value;
-
 			fname = lookupFileNamebyInode(Number(fid));
 			if (!fname)
 			{
 				return;
 			}
          	console.log(" id1 found: " + id1 + ", fname " + fname);
-
          	var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/'+fname;
-
 			var ext = getFileExtension(fname);         
 			if ( ext === 'jpg' || ext === 'png'){
 				value = '<img title="'+fname+'" class="imgContent" src="'+ url + '" width="100%" height="100%">';
@@ -220,16 +223,14 @@
 				setVideoUri(url);
 				setTimeout(function(){
 					$("#carouselModal").modal('hide');
-				}, 200);
-				return false;
-				
+				}, 500);
+				return false;				
 			}
 			else{
 				console.log("unknow value: " + fname);
 				return false;
 			}
-			$(target).append(value);
-	 
+			$(target).append(value);	 
 			$("#carouselModal #titleContent").empty();
 			$("#carouselModal #titleContent").append($(".carousel-inner .active").children().eq(1).attr('title'));
 			return true;
@@ -285,12 +286,9 @@
          
 			 if (Content.type === 'dir')
 			 {
-				return;
-			 }
-			 
-			 Content.option_type = getFileExtension(Content.name);
-			 //Content.id = 13;
-			 
+				return '';
+			 }			 
+			 Content.option_type = getFileExtension(Content.name);			 
 			 var path = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/' + Content.name;
          
             if (Content.option_type == 'mp4') {
@@ -327,21 +325,19 @@
          }
          
          function getLibraryContents() {
-         $.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/dirs?path=/sda1", function(libContents){
+			 console.log('go Contents --');
+         var obj = $.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/dirs", {path: "/sda1"}, function(libContents){
          	var new_content = '';
-         	//console.log("get picture: ", libContents);
+			console.log("Content: " + libContents.length + " Files");
          	for (var i=0; i<libContents.length; i++)
          	{
-         		//showCarousel(libContents,i);
          		new_content += makeHtmlContentElement(libContents[i], i);
          	}
-
-			file_list = libContents;
-         
+			file_list = libContents;         
          	new_content += '<p></p>';
          	document.getElementById("itemCarousel").innerHTML = new_content;
-         	//$('.carousel').carousel({interval: 2500});
          });
+		 //obj.error(function(e){console.log("getLibraryContents fail: " + e);});
          
          }
          
@@ -410,6 +406,12 @@
          			console.log("stop storage: ", json);
          		});
          	});
+
+			$("#format_storage").click(function(){
+         		$.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/makefs", {path: "/dev/sda1"}, function(json){
+         			console.log("format storage: ", json);
+         		});
+         	});
          
          	$.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/sdinfo", function(json){
          		console.log("get sd: ", json);
@@ -419,8 +421,7 @@
          		 $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur); 
          		 $("#storageinfo").html("存储介质:"+json.device+",OEM 产商:"+json.oem+"<p>空间容量:" 
 				 + Math.round(json.total/oneM) + "M字节, 剩余" + free +"M字节");
-         	});
-			
+         	});			
          
          });
          
