@@ -20,6 +20,8 @@ struct cvrfs_inode_object *cvr_fs_root_get(struct cvrfs_object *obj);
 /*create entrires*/
 int cvr_fs_create_dir(struct cvrfs_inode_object *parent,const char *name,uint64_t pre_allocated);
 int cvr_fs_create_file(struct cvrfs_inode_object *parent,const char *name,uint64_t pre_allocated);
+int cvr_fs_create_encryption_file(struct cvrfs_inode_object *parent,
+	const char *name,uint64_t pre_allocated);
 
 /*delete inode*/
 int cvr_fs_delete_file(struct cvrfs_inode_object *parent,const char *name);

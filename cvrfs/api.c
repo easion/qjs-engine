@@ -34,14 +34,15 @@
 enum part {
 	PART_UNKNOWN,
 	PART_FILENAME,
-	PART_FILEDATA
+	PART_ENCRYPTION,
+	PART_END
 };
 
-const char *parts[] = {
+static const char *parts[] = {
 	"(bug)",
 	//"sessionid",
 	"filename",
-	"filedata",
+	"encryption",
 };
 
 struct upload_state
@@ -50,6 +51,7 @@ struct upload_state
 	enum part parttype;
 	char *filename;
 	bool filedata;
+	int has_encryption;
 	int has_error;
 	struct cvrfs_inode_object *cvr_handle;
 	int sent_rsp;
@@ -115,7 +117,11 @@ static int cvr_read_dir(cJSON *json, const char *dirpath)
 	while ((e = cvr_fs_read_dir(root, NULL)) != NULL)
 	{
 		cJSON *f_item = cJSON_CreateObject();
-		if ((e->attribute & CVR_FS_ATTR_VIDEO_FILE) == CVR_FS_ATTR_VIDEO_FILE)
+		if ((e->attribute & CVR_FS_ATTR_ENCRYPTION_FILE) == CVR_FS_ATTR_ENCRYPTION_FILE)
+		{
+			cJSON_AddStringToObject(f_item, "type", "encryption_file");
+		}
+		else if ((e->attribute & CVR_FS_ATTR_VIDEO_FILE) == CVR_FS_ATTR_VIDEO_FILE)
 		{
 			cJSON_AddStringToObject(f_item, "type", "video");
 		}
@@ -186,6 +192,7 @@ static int api_get_sdinfo_cb(struct http_connection *connection, const struct ht
 		cvrfs_clusters_statistical(fs);
 		cJSON_AddStringToObject(resp, "device", cvrroot);
 		cJSON_AddStringToObject(resp, "oem", fs->oem);
+		cJSON_AddBoolToObject(resp, "encryption_flag", fs->fs_encryption);
 		cJSON_AddNumberToObject(resp, "used_clusters", fs->used_clusters);
 		cJSON_AddNumberToObject(resp, "total_clusters", fs->n_clusters);
 		cJSON_AddNumberToObject(resp, "version", fs->fs_version);
@@ -268,6 +275,36 @@ static int api_rm_file_cb(struct http_connection *connection, const struct http_
 	return 1;
 }
 
+static int api_set_props_cb(struct http_connection *connection, const struct http_msg *msg, void *arg)
+{
+	const char *props = NULL;
+	CHECK_VALID_USERNAME(msg, connection, "username");
+	int rc = -1;
+	struct cvrfs_object *fs = cvr_fs_get();
+
+	props = http_request_query_parameter(msg, "encryption");
+	if (props != NULL)
+	{
+		if (strcasecmp(props, "on") == 0)
+		{
+			fs->fs_encryption = 1;
+		}
+		else{
+			fs->fs_encryption = 0;
+		}
+	}
+	else {
+	}
+
+	if (rc < 0)
+	{
+		connection_send_json_rsp(connection, "FAIL");
+	}
+	else{
+		connection_send_json_rsp(connection, "OK");
+	}
+	return 1;
+}
 
 /*
 makefs
@@ -285,8 +322,18 @@ static void * make_fs_thread_enry(void *arg)
 		snprintf(cmd, sizeof(cmd), "umount /mnt/");
 		system(cmd);
 		LOGI("CVR make fs entry %s", path);
+
+		uint8_t aeskey[32];
+		char host[512];
+		int len = 0;
+		
+		//len = snprintf(host, sizeof(host), "%s-%s-%lld", get_host_name(),path,(long long)time(NULL));
+		len = snprintf(host, sizeof(host), "%s-%s", get_host_name(),path);
+		memset(aeskey,0,sizeof(aeskey));
+
+		md5_encode(host, len, (uint8_t *)aeskey);
 		//create_fs("/mnt/sda1/cvrfs.img",1024*1024*1024);
-		cvr_fs_make(path, NULL, CLUSTER_SIZE);
+		cvr_fs_make(path, aeskey, CLUSTER_SIZE);
 		free(path);
 	}
 	LOGI("CVR makefs Okey!");
@@ -452,7 +499,7 @@ header_value(multipart_parser *p, const char *data, size_t len)
 		LOGI(" -->skip data %s", data);
 		return 0;
 	}
-	//LOGI(" --> data %s", data);
+	LOGI(" --> data %s", data);
 
 	for (data += 6, len -= 6, i = 0; i <= len; i++)
 	{
@@ -492,7 +539,10 @@ header_value(multipart_parser *p, const char *data, size_t len)
 			//asprintf(&state->filename, "%x_%s",(uint16_t)time(NULL), tmp);
 			state->filename = strdup(tmp);
 			LOGI(" --> Filename '%s'", state->filename);
-			state->parttype = PART_FILEDATA;
+			state->parttype = PART_END;			
+		}
+		else if (state->parttype == PART_ENCRYPTION){
+			LOGI("PART ENCRYPTION FOUND!");
 		}
 		else{
 			if (state->filename != NULL)
@@ -512,7 +562,7 @@ static int data_begin_cb(multipart_parser *p)
 {
 	struct upload_state *state = multipart_parser_get_param(p);
 
-	if (state->parttype == PART_FILEDATA)
+	if (state->parttype == PART_END)
 	{
 		struct cvrfs_object *fs = cvr_fs_get();
 		struct cvrfs_inode_object *root = NULL;
@@ -524,7 +574,15 @@ static int data_begin_cb(multipart_parser *p)
 			return -1;
 		}
 		root = cvr_fs_root_get(fs);
-		rc = cvr_fs_create_file(root, state->filename, state->file_size?state->file_size:15*1024*1024);
+		if (state->has_encryption || fs->fs_encryption)
+		{
+			rc = cvr_fs_create_encryption_file(root, state->filename, 
+				state->file_size?state->file_size:15*1024*1024);
+		}
+		else{
+			rc = cvr_fs_create_file(root, state->filename, 
+				state->file_size?state->file_size:15*1024*1024);
+		}
 		if (rc < 0)
 		{
 			LOGI("Create failed for %s", state->filename);
@@ -553,7 +611,7 @@ static int data_cb(multipart_parser *p, const char *data, size_t len)
 
 	switch (state->parttype)
 	{
-	case PART_FILEDATA:		
+	case PART_END:		
 		if (!len)
 		{
 			//LOGI("Nil DATA %d", (int)len);
@@ -585,7 +643,7 @@ data_end_cb(multipart_parser *p)
 	struct upload_state *state = multipart_parser_get_param(p);
 	//LOGI("upload end parttype: %d", state->parttype);
 	
-	if (state->parttype == PART_FILEDATA)
+	if (state->parttype == PART_END)
 	{		
 		if (state->cvr_handle)
 		{
@@ -906,7 +964,8 @@ static int cvr_fs_open_fp_file(const char *filename, const char *mode, struct fi
 
 /*
 http://192.168.16.200:8080/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/copy?path=3d28_aa1.mp4
-http://192.168.16.200:8080/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/rm?path=4799_3.jpg
+http://192.168.16.200:8080/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/rm?path=Lost-And-Found
+http://192.168.16.200:8080/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/dirs?path=/
 http://192.168.16.200:8080/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/makefs?path=/mnt/sda1/cvrfs.img
 */
 
@@ -926,6 +985,7 @@ int cvrfs_api_init(void *base)
 	http_server_add_route(http_server, HTTP_GET, "/api/:username/storage/:filename", api_get_file_cb, NULL);	
 	http_server_add_route(http_server, HTTP_GET, "/api/:username/cvrstorage/:filename", api_get_cvr_file_cb, NULL);	
 	http_server_add_route(http_server, HTTP_GET, "/api/:username/cvr/rm", api_rm_file_cb, NULL);	
+	http_server_add_route(http_server, HTTP_GET, "/api/:username/cvr/set", api_set_props_cb, NULL);	
 	http_server_add_route(http_server, HTTP_GET, "/api/:username/cvr/makefs", api_make_fs_cb, NULL);	
 	http_server_add_route(http_server, HTTP_GET, "/api/:username/cvr/copy", api_copy_out_cb, NULL);	
 	

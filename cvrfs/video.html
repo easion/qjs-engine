@@ -33,7 +33,7 @@
                      preload="auto"
                      poster="//vjs.zencdn.net/v/oceans.png"
                      data-setup='{}' >
-                     <source id="mp4_src" src="/api/1ab46668c3f5eb07ad6465ee479bd064/cvrstorage/9f83_dzq.mp4" type="video/mp4">
+                     <source id="mp4_src" src="https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4" type="video/mp4">
                   </video>
                </div>
                <div class="col-md-6" >
@@ -41,6 +41,15 @@
                      <label for="exampleFormControlFile1">上传媒体文件</label>
                      <input type="file" multiple class="file-loading form-control-file"  name="txt_file" id="txt_file" >
                   </div>
+
+				  <div class="form-group">
+					  <div class="checkbox">
+						<label>
+							<input type="checkbox" id="encryption" value="on"> 对文件加密
+						</label>
+					   </div>
+				  </div>
+
                </div>
             </div>
 
@@ -180,6 +189,19 @@
          		validateInitialCount:true,
          		previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
          		msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+				uploadExtraData: function(){
+					 var obj = {};
+					 obj.encryption = $("#encryption").val();
+					 if (!obj.encryption)
+					 {
+						 obj.encryption = 'off';
+					 }
+					 //console.log("uploadExtraData: ", obj);
+					 return obj;
+				},
+				//uploadExtraData:{'encryption': $("#encryption").val()}, 
+				
+
          	});
          
          	//导入文件上传完成之后的事件
@@ -227,6 +249,8 @@
 				return false;				
 			}
 			else{
+				//window.location.herf=url;
+				window.open(url);
 				console.log("unknow value: " + fname);
 				return false;
 			}
@@ -298,9 +322,17 @@
 				}
                 Class = 'videoContent';
 				path = '/video.jpg';
-            } else if (Content.option_type == 'jpg' || Content.option_type == 'png') {
+            } else if (Content.option_type == 'jpg' 
+				|| Content.option_type == 'jpeg'
+				|| Content.option_type == 'gif'
+				|| Content.option_type == 'webp' ) {
                 Class = 'imgContent';
             }
+			else{
+				Class = 'videoContent';
+				path = '/favicon.png';
+				console.log("option_type: " + Content.option_type);
+			}
             //if (Content.deletable == 1) {
                 Button1 =
                     '<button onclick="deleteFile(\''+Content.name+'\');" type="button" class="btn btn-xs btn-danger btn-delete btn-delete-content">' +
@@ -362,15 +394,30 @@
          
          function deleteFile( path)
          {
-         var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/rm';
+			 var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/rm';
 
-		 console.log("Delete file " + path);
-         $.getJSON(url, {path: path,type: "video"}, function (response) {         
-         	if (response.error)
-         		console.log(response.error);
-         	getLibraryContents();
-         	$("#current_info").html("删除文件"+path+"已经执行");
-         });
+			 console.log("Delete file " + path);
+			 $.getJSON(url, {path: path,type: "video"}, function (response) {         
+				if (response.error)
+					console.log(response.error);
+				getLibraryContents();
+				$("#current_info").html("删除文件"+path+"已经执行");
+			 });
+         }
+
+		 function setEncryptionFlag(v)
+         {
+			 var url = '/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/set';
+
+			 console.log( "Encryption: as " + v);
+
+			 console.log("Enc file " + v);
+			 $.getJSON(url, {encryption: v}, function (response) {         
+				if (response.error)
+					console.log(response.error);
+				//getLibraryContents();
+				//$("#current_info").html("删除文件"+path+"已经执行");
+			 });
          }
          
          $(document).ready(function(){
@@ -412,12 +459,26 @@
          			console.log("format storage: ", json);
          		});
          	});
+
+
+			$( "#encryption" ).change(function() {
+				if ( $( "#encryption" ).is(':checked') == true)
+				{
+					setEncryptionFlag('on');
+				}
+				else{
+					setEncryptionFlag('off');
+				}
+			  
+			});
          
          	$.getJSON("/api/1ab46668c3f5eb07ad6465ee479bd064/cvr/sdinfo", function(json){
          		console.log("get sd: ", json);
          		var valeur = Math.round((json.used)*100 / json.total);
 				var oneM = 1024*1024;
 				var free = Math.round((json.total - json.used)/oneM);
+				
+				$("#encryption").prop( "checked", json.encryption_flag);				
          		 $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur); 
          		 $("#storageinfo").html("存储介质:"+json.device+",OEM 产商:"+json.oem+"<p>空间容量:" 
 				 + Math.round(json.total/oneM) + "M字节, 剩余" + free +"M字节");
